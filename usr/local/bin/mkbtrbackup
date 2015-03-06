@@ -14,7 +14,9 @@
 # Hope you'll enjoy this software!
 
 CMDL="$0 $@"
-SHLOCK=/usr/local/bin/shlock
+# I don't have shlock, so I'll use a poor man's work around
+#SHLOCK=/usr/local/bin/shlock
+PIDFILE=/var/run/$(basename "$0").pid
 
 # You can define some Parts in this config-file, which is also shipped with this package. Just study the comments there, make your changes
 # and uncomment this line 
@@ -435,13 +437,19 @@ done
 
 unset e
 
-# shlock (from inn) does the right thing and grabs a lock for a dead process
-# (it checks the PID in the lock file and if it's not there, it
-# updates the PID with the value given to -p)
-if ! $SHLOCK -p $$ -f $lock; then
-    echo "$lock held for $PROG, quitting" >&2
-    exit
+## shlock (from inn) does the right thing and grabs a lock for a dead process
+## (it checks the PID in the lock file and if it's not there, it
+## updates the PID with the value given to -p)
+#if ! $SHLOCK -p $$ -f $lock; then
+#    echo "$lock held for $PROG, quitting" >&2
+#    exit
+#fi
+(set -o noclobber; echo "$$" >"${PIDFILE}" 2>/dev/null)
+if [ $? -ne 0 ]; then
+  # PIDFILE exists, we do abort
+  die "PIDFILE ${PIDFILE} already exists - aborting"
 fi
+trap "rm ${PIDFILE}" EXIT
 
 # Trap errors for logging before we die (so that they can be picked up # by the log checker) 
 trap 'die "Error line $LINENO with status $?"' ERR
