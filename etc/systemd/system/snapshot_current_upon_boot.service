@@ -1,0 +1,12 @@
+[Unit]
+Description=Takes a snapshot of each btrfs subvolume mounted under / after multi-user.target has been reached.
+#After=multi-user.target
+After=multi-user.target gdm.service
+
+[Service]
+Type=oneshot
+ExecPreStart=/usr/local/bin/mkbtrbackup delete SNP $(/usr/local/bin/mkbtrbackup list STR BTR @debian-new.*.afterboot|sed -e '$d'|sed -e '$d')
+ExecStart=/usr/local/bin/mkbtrbackup create /var/cache/btrfs_pool_SYSTEM/@debian-new -t afterboot -T LASTBOOT -L
+
+[Install]
+WantedBy=multi-user.target

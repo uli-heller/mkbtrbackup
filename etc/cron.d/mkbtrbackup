@@ -1,0 +1,2 @@
+*/10 * * * * root /usr/local/bin/mkbtrbackup create /var/cache/btrfs_pool_SYSTEM/$(/usr/local/bin/syssubvol) --interval dmin -L -q
+#* * * * * root /bin/echo "ich bin ein TEST"
